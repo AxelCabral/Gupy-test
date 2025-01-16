@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Percentual de Faturamento por Estado</title>
+</head>
+<body>
+    <h1>Percentual de Faturamento Mensal por Estado</h1>
+    <div id="result"></div>
+
+    <script>
+        const faturamento = {
+            "SP": 67836.43,
+            "RJ": 36678.66,
+            "MG": 29229.88,
+            "ES": 27165.48,
+            "Outros": 19849.53
+        };
+
+        let totalFaturamento = 0;
+        for (let estado in faturamento) {
+            totalFaturamento += faturamento[estado];
+        }
+
+        let resultadoHTML = '<ul>';
+        for (let estado in faturamento) {
+            const percentual = ((faturamento[estado] / totalFaturamento) * 100).toFixed(2);
+            resultadoHTML += `<li>${estado}: R$ ${faturamento[estado].toFixed(2)} - ${percentual}%</li>`;
+        }
+        resultadoHTML += `</ul>`;
+        resultadoHTML += `<p><strong>Total de faturamento: R$ ${totalFaturamento.toFixed(2)}</strong></p>`;
+
+        document.getElementById("result").innerHTML = resultadoHTML;
+    </script>
+</body>
+</html>

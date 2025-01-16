@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Faturamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+        pre {
+            text-align: left;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Análise de Faturamento Diário</h1>
+    <p>Carregue um arquivo JSON com os dados de faturamento diário:</p>
+    <input type="file" id="fileInput" accept=".json" />
+    <button onclick="processarArquivo()">Analisar Faturamento</button>
+    <h3>Resultado:</h3>
+    <pre id="output">Nenhum dado carregado ainda...</pre>
+
+    <script>
+        // Função para processar o arquivo JSON carregado pelo usuário
+        function processarArquivo() {
+            const fileInput = document.getElementById("fileInput");
+            const output = document.getElementById("output");
+
+            if (!fileInput.files.length) {
+                output.textContent = "Por favor, carregue um arquivo JSON.";
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                try {
+                    // Tenta fazer o parsing do conteúdo do arquivo
+                    const faturamentoMensal = JSON.parse(event.target.result);
+
+                    // Verifica se os dados são válidos
+                    if (!Array.isArray(faturamentoMensal)) {
+                        throw new Error("O arquivo JSON deve conter um array de objetos.");
+                    }
+
+                    // Chama a função de análise
+                    const resultado = analisarFaturamento(faturamentoMensal);
+
+                    // Exibe o resultado no HTML
+                    output.textContent = resultado;
+                } catch (error) {
+                    output.textContent = `Erro ao processar o arquivo: ${error.message}`;
+                }
+            };
+
+            reader.onerror = function () {
+                output.textContent = "Erro ao ler o arquivo.";
+            };
+
+            reader.readAsText(file);
+        }
+
+        // Função para calcular os valores solicitados
+        function analisarFaturamento(dados) {
+            // Filtrar apenas os dias com faturamento
+            const diasComFaturamento = dados.filter(dia => dia.valor > 0);
+
+            if (diasComFaturamento.length === 0) {
+                return "Nenhum dia com faturamento encontrado.";
+            }
+
+            // Encontrar o menor e o maior valor de faturamento
+            const menorFaturamento = Math.min(...diasComFaturamento.map(d => d.valor));
+            const maiorFaturamento = Math.max(...diasComFaturamento.map(d => d.valor));
+
+            // Calcular a média de faturamento
+            const somaFaturamento = diasComFaturamento.reduce((soma, dia) => soma + dia.valor, 0);
+            const mediaFaturamento = somaFaturamento / diasComFaturamento.length;
+
+            // Contar os dias com faturamento acima da média
+            const diasAcimaDaMedia = diasComFaturamento.filter(dia => dia.valor > mediaFaturamento).length;
+
+            // Retornar o resultado formatado
+            return `
+              Menor faturamento: ${menorFaturamento.toFixed(2)}
+              Maior faturamento: ${maiorFaturamento.toFixed(2)}
+              Dias com faturamento acima da média: ${diasAcimaDaMedia}
+            `;
+        }
+    </script>
+</body>
+</html>
